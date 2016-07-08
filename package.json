@@ -1,0 +1,26 @@
+{
+  "name": "tiny-browser",
+  "version": "0.0.1",
+  "description": "Tiny wrapper of phantomjs-node package",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nodiel/tiny-browser.git"
+  },
+  "keywords": [
+    "phantomjs",
+    "nodejs"
+  ],
+  "author": "Nodiel",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nodiel/tiny-browser/issues"
+  },
+  "homepage": "https://github.com/nodiel/tiny-browser#readme",
+  "dependencies": {
+    "phantom": "^2.1.11"
+  }
+}
