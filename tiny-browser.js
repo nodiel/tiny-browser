@@ -7,7 +7,7 @@ const EventEmitter = require('events');
 
 function TinyBrowser() {
     EventEmitter.call(this);
-    
+
     var self = this;
     this._loading = false;
     this._onReadyTimeout = 10 * 1000;
@@ -68,6 +68,7 @@ TinyBrowser.prototype = _.create(EventEmitter.prototype, {
 
         this.page.on('onLoadFinished', status => {
             self._loading = false;
+            self.emit('phantom.onLoadFinished', status);
         });
 
         this.page.on('onError', function(message, trace) {
@@ -137,6 +138,9 @@ TinyBrowser.prototype = _.create(EventEmitter.prototype, {
                         }
                     }
                 }, data);
+            })
+            .then(() => {
+                self.emit('onFormFilled');
             });
     },
 
