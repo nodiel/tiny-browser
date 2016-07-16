@@ -49,7 +49,7 @@ TinyBrowser.prototype = _.create(EventEmitter.prototype, {
                     reject('onready timeout');
                     clearInterval(interval);
                 }
-            }, 25);
+            }, 100);
         });
 
         return Promise.all([this._ready, loaderPolling]);
@@ -68,7 +68,6 @@ TinyBrowser.prototype = _.create(EventEmitter.prototype, {
 
         this.page.on('onLoadFinished', status => {
             self._loading = false;
-            self.emit('phantom.onLoadFinished', status);
         });
 
         this.page.on('onError', function(message, trace) {
