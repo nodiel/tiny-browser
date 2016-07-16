@@ -1,0 +1,14 @@
+html
+    head
+
+    body
+
+        label#delayed-text
+
+        script(type='text/javascript').
+            (function() {
+                setTimeout(function() {
+                    document.querySelector('#delayed-text').className = 'dummy-class';
+                }, 2000)
+            })();
+

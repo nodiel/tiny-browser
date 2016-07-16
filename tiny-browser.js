@@ -174,7 +174,6 @@ TinyBrowser.prototype = _.create(EventEmitter.prototype, {
                 checkCb.apply(self)
                     .then(conditionResult => {
                         if (conditionResult) {
-                            console.log('condition passed after: ', Date.now() - start);
                             resolve();
                             clearInterval(interval);
                         }

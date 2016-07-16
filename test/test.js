@@ -10,7 +10,8 @@ var http = require('http');
 
 
 describe('TinyBrowser', function() {
-    this.timeout(10000);
+    this.timeout(0);
+    this.slow(10 * 1000);
 
     var browser = new TinyBrowser();
     var server = http.createServer(testServerApp);
@@ -19,7 +20,7 @@ describe('TinyBrowser', function() {
         server.listen(3000);
     });
 
-    describe('click', function() {
+    describe('#click()', function() {
         it('should click the button', function() {
         
             return browser.open('http://localhost:3000/test-click/')
@@ -30,7 +31,21 @@ describe('TinyBrowser', function() {
                    return browser.fetchText('#message');
                 })
                 .should.eventually.equal('clicked button');
-        })
+        });
+    });
+
+    describe('#waitForSelector()',function() {
+        it('should fulfill after 2 secs approx', function(done) {
+            return browser.open('http://localhost:3000/test-waitfor/')
+                .then(function() {
+                    return browser.waitForSelector('label#delayed-text.dummy-class');
+                })
+                .then(function() {
+                    done();
+                })
+                .catch(function(err) {
+                    done(err);
+                });
+        });
     });
 });
-
