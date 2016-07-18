@@ -4,7 +4,7 @@ var chaiAsPromised = require('chai-as-promised');
 var should = chai.should();
 chai.use(chaiAsPromised);
 
-var TinyBrowser = require('../tiny-browser');
+var TinyBrowser = require('../');
 var testServerApp = require('./testserver/app');
 var http = require('http');
 
