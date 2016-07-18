@@ -22,7 +22,7 @@ describe('TinyBrowser', function() {
 
     describe('#click()', function() {
         it('should click the button', function() {
-        
+
             return browser.open('http://localhost:3000/test-click/')
                 .then(function() {
                     return browser.click('#click-here');
