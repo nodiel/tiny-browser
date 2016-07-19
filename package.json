@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "build-lib": "babel -d dist src",
+    "build-lib": "babel -d dist src -s",
     "postinstall": "postinstall-build dist 'npm run build-lib'"
   },
   "repository": {
@@ -27,11 +27,14 @@
   },
   "devDependencies": {
     "babel-cli": "^6.10.1",
+    "babel-eslint": "^6.1.2",
     "babel-plugin-transform-runtime": "^6.9.0",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-stage-2": "^6.11.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
+    "eslint": "^3.1.1",
+    "eslint-plugin-babel": "^3.3.0",
     "express": "^4.14.0",
     "mocha": "^2.5.3",
     "pug": "^2.0.0-beta3"

@@ -1,76 +1,54 @@
 "use strict";
 
-const phantom = require('phantom');
-const _ = require('lodash');
-const EventEmitter = require('events');
+import phantom from "phantom";
 
+class TinyBrowser {
 
-function TinyBrowser() {
-    EventEmitter.call(this);
+    /**
+     * Creates a new instance of TinyBrowser
+     *
+     * @param      {Object}  options  Options passed to the browser and phantom
+     * @return     {TinyBrowser}  a new instance of TinyBrowser
+     */
+    static async create(options) {
+        let browserInstance = new TinyBrowser();
 
-    var self = this;
-    this._loading = false;
-    this._onReadyTimeout = 10 * 1000;
+        browserInstance._loading = false;
+        browserInstance._untilReadyTimeout = 10 * 1000;
 
-    this._ready = new Promise((resolve, reject) => {
-        phantom.create()
-            .then(instance => {
-                self.phInstance = instance;
-                return instance.createPage();
-            })
-            .then(page => {
-                self.page = page;
-                resolve();
-            })
-            .then(() => {
-                self._wireUpEvents();
-            })
-            .catch(reject);
-    });
-}
+        await browserInstance._init();
+        return browserInstance;
+    }
 
-TinyBrowser.prototype = _.create(EventEmitter.prototype, {
+    /**
+     * Initializes the phantom instance and page
+     */
+    async _init() {
+        this._phInstance = await phantom.create();
+        this._page = await this._phInstance.createPage();
 
-    constructor: TinyBrowser,
+        this._wireUpEvents();
+    }
 
-    _onReady: function() {
+    /**
+     * Wires all the needed events from phantom runtime
+     */
+    _wireUpEvents() {
         const self = this;
 
-        const loaderPolling = new Promise((resolve, reject) => {
-            const start = Date.now();
-            let interval = null;
-
-            interval = setInterval(() => {
-                if (!self._loading) {
-                    clearInterval(interval);
-                    resolve();
-                }
-                else if ((Date.now() - start) >= self._onReadyTimeout) {
-                    reject('onready timeout');
-                    clearInterval(interval);
-                }
-            }, 100);
-        });
-
-        return Promise.all([this._ready, loaderPolling]);
-    },
-
-    _wireUpEvents: function() {
-        const self = this;
-
-        this.page.on('onConsoleMessage', (message, lineNum, sourceId) => {
+        this._page.on('onConsoleMessage', (message, lineNum, sourceId) => {
             console.log('CONSOLE: ' + message + ' (from line ' + lineNum + ' in ' + sourceId);
         });
 
-        this.page.on('onLoadStarted', () => {
+        this._page.on('onLoadStarted', () => {
             self._loading = true;
         });
 
-        this.page.on('onLoadFinished', status => {
+        this._page.on('onLoadFinished', status => {
             self._loading = false;
         });
 
-        this.page.on('onError', function(message, trace) {
+        this._page.on('onError', function(message, trace) {
             var msgStack = ['ERROR: ' + message];
 
             if (trace && trace.length) {
@@ -83,23 +61,57 @@ TinyBrowser.prototype = _.create(EventEmitter.prototype, {
 
             console.error(msgStack.join('\n'));
         });
-    },
+    }
 
-    open: function(url) {
-        const self = this;
+    async _untilReady() {
+        let self = this;
 
-        return this._onReady()
-            .then(() => {
-                return self.page.open(url);
-            });
-    },
+        const loaderPolling = new Promise(function(resolve, reject) {
+            const started = Date.now();
+            let interval = null;
 
-    click: function(elementSelector) {
-        const self = this;
+            interval = setInterval(function() {
+                let elapsed = (Date.now() - started);
 
-        var clickFn = function (domSelector) {
+                // if phantom is done loading
+                // see the onLoadStarted and onLoadFinished events
+                if (!self._loading) {
 
+                    clearInterval(interval);
+                    resolve();
+                }
+                // or if the has passed the timeout
+                // reject the promise notifying the reason
+                else if (elapsed >= self._untilReadyTimeout) {
+                    clearInterval(interval);
+                    reject(`_untilReady timed out after: ${elapsed}`);
+                }
+
+            }, 25);
+        });
+
+        return loaderPolling;
+    }
+
+    /**
+     * Navigates to the specified url
+     *
+     * @param      {String}  url     The url
+     */
+    async open(url) {
+        await this._untilReady();
+        await this._page.open(url);
+    }
+
+    /**
+     * Clicks the element specified by selector
+     *
+     * @param      {String}  selector  The selector
+     */
+    async click(selector) {
+        let clickFunction = function(domSelector) {
             var clickEvent = document.createEvent("MouseEvent");
+
             clickEvent.initMouseEvent(
                 "click",
                 true, true,
@@ -111,113 +123,98 @@ TinyBrowser.prototype = _.create(EventEmitter.prototype, {
 
             var element = document.querySelector(domSelector);
             element.dispatchEvent(clickEvent);
-
         };
 
-        return this._onReady()
-            .then(() => {
-                return self.page.evaluate(clickFn, elementSelector);
-            });
-    },
+        await this._untilReady();
+        await this._page.evaluate(clickFunction, selector);
+    }
 
-    fillForm: function(data) {
+    async fillForm(data) {
+
+        let fillerFunction = function(domData) {
+            for (var selector in domData) {
+                var element = document.querySelector(selector);
+
+                if (!element) {
+                    console.log('Not found sleector. fillForm');
+                    continue;
+                }
+
+                element.value = domData[selector];
+            }
+        };
+
+        await this._untilReady();
+        await this._page.evaluate(fillerFunction, data);
+    }
+
+    async capture(outPath) {
+        await this._untilReady();
+
+        return await this._page.render(outPath);
+    }
+
+    async waitFor(asyncPredicate, timeout) {
         const self = this;
 
-        return this._onReady()
-            .then(() => {
-                return self.page.evaluate(function(jsData) {
-                    for (var selector in jsData) {
-                        var element = document.querySelector(selector);
+        let maxTimeout = timeout || 5 * 1000;
 
-                        if (!element) {
-                            console.log('not found selector in fillForm: ' + selector);
-                        }
-                        else {
-                            element.value = jsData[selector];
-                        }
-                    }
-                }, data);
-            })
-            .then(() => {
-                self.emit('onFormFilled');
-            });
-    },
-
-    capture: function(filePath) {
-        const self = this;
-
-        return this._onReady()
-            .then(() => {
-                return self.page.render(filePath);
-            });
-    },
-
-    destroy: function() {
-        const self = this;
-
-        return this._onReady()
-            .then(() => {
-                self.phInstance.exit();
-            });
-    },
-
-    waitFor: function(checkCb, timeout) {
-        const self = this,
-            maxTimeout = timeout || 5000;
-
-
-        const conditionPolling = new Promise((resolve, reject) => {
-            const start = Date.now();
+        let conditionPolling = new Promise(function(resolve, reject) {
+            const started = Date.now();
             let interval = null;
 
-            interval = setInterval(function() {
-                checkCb.apply(self)
-                    .then(conditionResult => {
-                        if (conditionResult) {
+            interval = setInterval(() => {
+                asyncPredicate.call(self)
+                    .then(result => {
+                        let elapsed = Date.now() - started;
+
+                        if (result) {
+                            clearInterval(interval);
                             resolve();
-                            clearInterval(interval);
                         }
-                        else if ((Date.now() - start) >= maxTimeout) {
-                            reject("Timeout");
+
+                        else if (elapsed >= maxTimeout) {
                             clearInterval(interval);
+                            reject(`waitFor timed out after: ${elapsed}`);
                         }
                     })
                     .catch(err => {
-                        console.log(err);
+                        reject(err);
                     });
-            }, 250);
+            });
         });
 
-        return Promise.all([this._onReady(), conditionPolling]);
-    },
-
-    waitForSelector: function(selector) {
-        var self = this;
-
-        return this._onReady()
-            .then(() => {
-                return self.waitFor(function() {
-                    return self.page.evaluate(function(jsSelector) {
-                        return !!document.querySelector(jsSelector);
-                    }, selector);
-                });
-            });
-    },
-
-    fetchText: function(elementSelector) {
-        var self = this;
-
-        var textExtractor = function(jsSelector) {
-            return document.querySelector(jsSelector).innerText;
-        };
-
-        return this._onReady()
-            .then(function() {
-                return self.page.evaluate(textExtractor, elementSelector);
-            });
+        await this._untilReady();
+        return conditionPolling;
     }
 
+    async waitForSelector(selector) {
+        const self = this;
 
-});
+        let checkerFunction = function(domSelector) {
+            return !!document.querySelector(domSelector);
+        };
+
+        await this._untilReady();
+
+        return this.waitFor(function() {
+            return self._page.evaluate(checkerFunction, selector);
+        });
+    }
+
+    async fetchText(selector) {
+        let textExtractor = function(domSelector) {
+            return document.querySelector(domSelector).innerText;
+        };
+
+        await this._untilReady();
+        return await this._page.evaluate(textExtractor, selector);
+    }
+
+    async destroy() {
+        await this._untilReady();
+        return this.phInstance.exit();
+    }
+}
 
 module.exports = TinyBrowser;
