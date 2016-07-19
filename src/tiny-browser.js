@@ -213,7 +213,7 @@ class TinyBrowser {
 
     async destroy() {
         await this._untilReady();
-        return this.phInstance.exit();
+        return this._phInstance.exit();
     }
 }
 
