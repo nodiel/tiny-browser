@@ -87,7 +87,7 @@ class TinyBrowser {
                     reject(`_untilReady timed out after: ${elapsed}`);
                 }
 
-            }, 25);
+            }, 100);
         });
 
         return loaderPolling;
