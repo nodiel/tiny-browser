@@ -4,7 +4,7 @@ var chaiAsPromised = require('chai-as-promised');
 var should = chai.should();
 chai.use(chaiAsPromised);
 
-var TinyBrowser = require('../');
+var browser = require('../');
 var testServerApp = require('./testserver/app');
 var http = require('http');
 
@@ -13,7 +13,6 @@ describe('TinyBrowser', function() {
     this.timeout(0);
     this.slow(10 * 1000);
 
-    var browser = new TinyBrowser();
     var server = http.createServer(testServerApp);
 
     before(function() {
@@ -22,13 +21,19 @@ describe('TinyBrowser', function() {
 
     describe('#click()', function() {
         it('should click the button', function() {
+            var browserInstance = null;
 
-            return browser.open('http://localhost:3000/test-click/')
-                .then(function() {
-                    return browser.click('#click-here');
+            return browser.create()
+                .then(function(instance) {
+                    browserInstance = instance;
+
+                    return browserInstance.open('http://localhost:3000/test-click/');
                 })
                 .then(function() {
-                   return browser.fetchText('#message');
+                    return browserInstance.click('#click-here');
+                })
+                .then(function() {
+                   return browserInstance.fetchText('#message');
                 })
                 .should.eventually.equal('clicked button');
         });
@@ -36,9 +41,15 @@ describe('TinyBrowser', function() {
 
     describe('#waitForSelector()',function() {
         it('should fulfill after 2 secs approx', function(done) {
-            return browser.open('http://localhost:3000/test-waitfor/')
+            var browserInstance = null;
+
+            return browser.create()
+                .then(function(instance) {
+                    browserInstance = instance;
+                    return instance.open('http://localhost:3000/test-waitfor/');
+                })
                 .then(function() {
-                    return browser.waitForSelector('label#delayed-text.dummy-class');
+                    return browserInstance.waitForSelector('label#delayed-text.dummy-class');
                 })
                 .then(function() {
                     done();
