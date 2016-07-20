@@ -1,6 +1,8 @@
 "use strict";
 
 import phantom from "phantom";
+var debug = require('debug')('tiny-browser');
+
 
 class TinyBrowser {
 
@@ -24,7 +26,10 @@ class TinyBrowser {
      * Initializes the phantom instance and page
      */
     async _init() {
+        debug('Initializing phantom instance.');
         this._phInstance = await phantom.create();
+
+        debug('Initializing phantom page instance.');
         this._page = await this._phInstance.createPage();
 
         this._wireUpEvents();
@@ -37,29 +42,33 @@ class TinyBrowser {
         const self = this;
 
         this._page.on('onConsoleMessage', (message, lineNum, sourceId) => {
-            console.log('CONSOLE: ' + message + ' (from line ' + lineNum + ' in ' + sourceId);
+            debug('Received message in browser console: %s', message);
         });
 
         this._page.on('onLoadStarted', () => {
-            self._loading = true;
+            self._page.property('url').then(url => {
+                debug('Started loading page: %s', url);
+
+                // Moved here, because the actions that this change triggers
+                // will execute before the debug message
+                // and will confuse whomever reads the logs about the order of actions
+                self._loading = true;
+            });
         });
 
         this._page.on('onLoadFinished', status => {
-            self._loading = false;
+
+            self._page.property('url').then(url => {
+                debug('Finished loading page: %s', url);
+
+                // Same reason as in `onLoadStarted`
+                self._loading = false;
+            });
         });
 
         this._page.on('onError', function(message, trace) {
-            var msgStack = ['ERROR: ' + message];
-
-            if (trace && trace.length) {
-                msgStack.push('TRACE:');
-
-                trace.forEach(function(t) {
-                    msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
-                });
-            }
-
-            console.error(msgStack.join('\n'));
+            // TODO: print trace too
+            debug('Error on javascript execution: %s', message);
         });
     }
 
@@ -70,13 +79,15 @@ class TinyBrowser {
             const started = Date.now();
             let interval = null;
 
+            debug('Waiting for page to be ready ...');
+
             interval = setInterval(function() {
                 let elapsed = (Date.now() - started);
 
                 // if phantom is done loading
                 // see the onLoadStarted and onLoadFinished events
                 if (!self._loading) {
-
+                    debug('Page ready after %d ms', elapsed);
                     clearInterval(interval);
                     resolve();
                 }
@@ -99,8 +110,12 @@ class TinyBrowser {
      * @param      {String}  url     The url
      */
     async open(url) {
+        debug('Opening url: %s', url);
+
         await this._untilReady();
         await this._page.open(url);
+
+        debug('Done opening url.');
     }
 
     /**
@@ -109,6 +124,8 @@ class TinyBrowser {
      * @param      {String}  selector  The selector
      */
     async click(selector) {
+        debug('Clicking selector: %s', selector);
+
         let clickFunction = function(domSelector) {
             var clickEvent = document.createEvent("MouseEvent");
 
@@ -127,9 +144,12 @@ class TinyBrowser {
 
         await this._untilReady();
         await this._page.evaluate(clickFunction, selector);
+
+        debug('Done clicking selector.');
     }
 
     async fillForm(data) {
+        debug('Filling fields with values: %s', JSON.stringify(data));
 
         let fillerFunction = function(domData) {
             for (var selector in domData) {
@@ -149,6 +169,7 @@ class TinyBrowser {
     }
 
     async capture(outPath) {
+        debug('Capturing screenshot to: %s', outPath);
         await this._untilReady();
 
         return await this._page.render(outPath);
@@ -181,7 +202,7 @@ class TinyBrowser {
                     .catch(err => {
                         reject(err);
                     });
-            });
+            }, 10);
         });
 
         await this._untilReady();
