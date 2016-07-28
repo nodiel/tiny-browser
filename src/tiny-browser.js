@@ -98,10 +98,22 @@ class TinyBrowser {
                     reject(`_untilReady timed out after: ${elapsed}`);
                 }
 
-            }, 50);
+            }, 10);
         });
 
         return loaderPolling;
+    }
+
+    /**
+     * Evaluates a function in the webpage context
+     *
+     * @param      {Function}  fn      The function
+     * @param      {...*}    args    Arguments to the function
+     * @return     {Promise}        Promise that fulfill when operation completed
+     */
+    async evaluate(fn, args) {
+        await this._untilReady();
+        return this._page.evaluate.apply(this._page, arguments);
     }
 
     /**
