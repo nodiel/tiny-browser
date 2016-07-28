@@ -1,15 +1,13 @@
-doctype html
-html
-    head
+extends ./layout.pug
 
-    body
-        input#click-here(type="button", value="click")
-        label#message
+block content
+    input#click-here(type="button", value="click")
+    label#message
 
-        
-        script(type='text/javascript').
-            (function() {
-                document.querySelector('#click-here').addEventListener('click', function(e) {
-                    document.querySelector('#message').innerText = 'clicked button'; 
-                });
-            })();
+
+    script(type='text/javascript').
+        (function() {
+            document.querySelector('#click-here').addEventListener('click', function(e) {
+                document.querySelector('#message').innerText = 'clicked button';
+            });
+        })();

@@ -1,14 +1,12 @@
-html
-    head
+extends ./layout.pug
 
-    body
+block content
+    label#delayed-text
 
-        label#delayed-text
-
-        script(type='text/javascript').
-            (function() {
-                setTimeout(function() {
-                    document.querySelector('#delayed-text').className = 'dummy-class';
-                }, 2000)
-            })();
+    script(type='text/javascript').
+        (function() {
+            setTimeout(function() {
+                document.querySelector('#delayed-text').className = 'dummy-class';
+            }, 2000)
+        })();
 
