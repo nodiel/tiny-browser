@@ -208,7 +208,7 @@ class TinyBrowser {
 
                         else if (elapsed >= maxTimeout) {
                             clearInterval(interval);
-                            reject(`waitFor timed out after: ${elapsed}`);
+                            reject(new Error(`waitFor predicate timedout after ${elapsed}.`));
                         }
                     })
                     .catch(err => {
