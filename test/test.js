@@ -104,4 +104,37 @@ describe('TinyBrowser', function() {
                 .should.eventually.equal('Some header');
         });
     });
+
+    describe('#visible()', function() {
+        it('should return false for not visible elements', function(){ 
+            var browserInstance = null;
+
+            return browser.create()
+                .then(function(instance) {
+                    browserInstance = instance;
+                    return browserInstance.open('http://localhost:3000/visible/');
+                })
+                .then(function() {
+                    return browserInstance.visible('#visibilityHidden')
+                        .should.eventually.equal(false);
+                })
+                .then(function() {
+                    return browserInstance.visible('#displayNone')
+                        .should.eventually.equal(false);
+                });
+        });
+        it('should return true for visible elements', function() {
+            var browserInstance = null;
+
+            return browser.create()
+                .then(function(instance) {
+                    browserInstance = instance;
+                    return browserInstance.open('http://localhost:3000/visible/');
+                })
+                .then(function() {
+                    return browserInstance.visible('#visibleBlock')
+                        .should.eventually.equal(true);
+                });
+        });
+    });
 });

@@ -13,4 +13,8 @@ router.get('/', function(request, response) {
     response.render('home');
 });
 
+router.get('/visible', function(request, response) {
+    response.render('visible');
+});
+
 module.exports = router;

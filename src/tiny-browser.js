@@ -221,6 +221,50 @@ class TinyBrowser {
         return conditionPolling;
     }
 
+    /**
+     * Returns true/false depending if the element identify by selector
+     * is visible
+     *
+     * @param      Boolean selector  The selector
+     */
+    async visible(selector) {
+        debug(`Checking visibility of element ${selector}`);
+
+        let visibleCheckRemoteFun = function(domSelector) {
+            var element = document.querySelector(domSelector);
+
+            var style;
+
+            try {
+                style = window.getComputedStyle(element, null);
+            }
+            catch (e) {
+                console.log('Error finding element: ' + domSelector);
+                return false;
+            }
+
+            var hidden = style.visibility === 'hidden' || style.display === 'none';
+
+            if (hidden) {
+                console.log('Element hidden with visibility hidden or display none');
+                return false;
+            }
+
+            if (style.display === "inline" || style.display === "inline-block") {
+                console.log('Element display is inline or inline-block.')
+                return true;
+            }
+
+            return element.clientHeight > 0 && element.clientWidth > 0;
+        }
+
+        let result = await this._page.evaluate(visibleCheckRemoteFun, selector);
+
+        debug(`Element visibility: ${result}`);
+
+        return result;
+    }
+
     async waitForSelector(selector) {
         const self = this;
 
