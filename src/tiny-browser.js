@@ -258,6 +258,8 @@ class TinyBrowser {
             return element.clientHeight > 0 && element.clientWidth > 0;
         }
 
+        await this._untilReady();
+
         let result = await this._page.evaluate(visibleCheckRemoteFun, selector);
 
         debug(`Element visibility: ${result}`);
