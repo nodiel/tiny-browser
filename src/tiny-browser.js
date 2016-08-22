@@ -58,17 +58,50 @@ class TinyBrowser {
 
         this._page.on('onLoadFinished', status => {
 
-            self._page.property('url').then(url => {
-                debug('Finished loading page: %s', url);
-
-                // Same reason as in `onLoadStarted`
-                self._loading = false;
-            });
+            self._page.property('url')
+                .then(url => {
+                    debug('Finished loading page: %s', url);
+                })
+                .then(function() {
+                    return self.injectClientUtils();
+                })
+                .then(function() {
+                    self._loading = false;
+                })
+                .catch(err => {
+                    debug('Error processing onLoadFinished(). ' + err);
+                })
         });
 
         this._page.on('onError', function(message, trace) {
             // TODO: print trace too
             debug('Error on javascript execution: %s', message);
+        });
+    }
+
+    async injectClientUtils() {
+        const clientUtilsInjected = await this._page.evaluate(function() {
+            return typeof __utils__ === "object";
+        });
+
+        if (clientUtilsInjected === true) {
+            debug('client utils already injected.');
+            return Promise.resolve();
+        }
+
+        debug('client utils not already injected.');
+
+        const includeResult = await this._page.injectJs(require('path').join(__dirname,'clientutils.js'));
+
+        if (true === includeResult) {
+            debug('Successfully injected client-side utilities');
+        }
+        else {
+            debug('Error injecting client-side utilities.');
+        }
+
+        await this._page.evaluate(function() {
+            window.__utils__ = new window.ClientUtils({});
         });
     }
 
@@ -230,37 +263,11 @@ class TinyBrowser {
     async visible(selector) {
         debug(`Checking visibility of element ${selector}`);
 
-        let visibleCheckRemoteFun = function(domSelector) {
-            var element = document.querySelector(domSelector);
-
-            var style;
-
-            try {
-                style = window.getComputedStyle(element, null);
-            }
-            catch (e) {
-                console.log('Error finding element: ' + domSelector);
-                return false;
-            }
-
-            var hidden = style.visibility === 'hidden' || style.display === 'none';
-
-            if (hidden) {
-                console.log('Element hidden with visibility hidden or display none');
-                return false;
-            }
-
-            if (style.display === "inline" || style.display === "inline-block") {
-                console.log('Element display is inline or inline-block.')
-                return true;
-            }
-
-            return element.clientHeight > 0 && element.clientWidth > 0;
-        }
-
         await this._untilReady();
 
-        let result = await this._page.evaluate(visibleCheckRemoteFun, selector);
+        let result = await this._page.evaluate(function(domSelector) {
+            return __utils__.visible(domSelector);
+        }, selector);
 
         debug(`Element visibility: ${result}`);
 
