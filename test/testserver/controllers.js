@@ -17,4 +17,8 @@ router.get('/visible', function(request, response) {
     response.render('visible');
 });
 
+router.get('/test-clientutils', function(request, response) {
+    response.render('test-clientutils');
+});
+
 module.exports = router;

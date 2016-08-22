@@ -1,0 +1,15 @@
+extends ./layout.pug
+
+block content
+    script.
+        function buttonClicked() {
+            if (typeof(__utils__) === "object") {
+                document.querySelector('#result').innerText = 'OK';
+            }
+            else {
+                document.querySelector('#result').innerText = 'BAD';
+            }
+        }
+
+    input#clickme(type='button', onclick='buttonClicked()', value='click here')
+    label#result
