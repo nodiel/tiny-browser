@@ -301,6 +301,22 @@ class TinyBrowser {
         });
     }
 
+    /**
+     * Waits for timeout amount of miliseconds
+     *
+     * @param      Number   timeout  The timeout
+     * @return     {Promise}  Promise that succeeds after timeout miliseconds
+     */
+    async wait(timeout) {
+        timeout = timeout || 1000;
+
+        return new Promise((resolve, reject) => {
+            setTimeout(function() {
+                resolve();
+            }, timeout);
+        });
+    }
+
     async fetchText(selector) {
         let textExtractor = function(domSelector) {
             return document.querySelector(domSelector).innerText;
