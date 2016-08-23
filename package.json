@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "build-lib": "cp src/clientutils.js dist/clientutils.js && babel -d dist src -s --ignore clientUtils.js",
+    "build-lib": "mkdir dist && cp src/clientutils.js dist/clientutils.js && babel -d dist src -s --ignore clientutils.js",
     "postinstall": "postinstall-build dist 'npm run build-lib'"
   },
   "repository": {
