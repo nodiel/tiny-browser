@@ -11,7 +11,7 @@ var http = require('http');
 
 describe('TinyBrowser', function() {
     this.timeout(0);
-    this.slow(10 * 1000);
+    this.slow(2 * 1000);
 
     var server = http.createServer(testServerApp);
 
@@ -106,7 +106,7 @@ describe('TinyBrowser', function() {
     });
 
     describe('#visible()', function() {
-        it('should return false for not visible elements', function(){ 
+        it('should return false for not visible elements', function(){
             var browserInstance = null;
 
             return browser.create()
@@ -137,4 +137,44 @@ describe('TinyBrowser', function() {
                 });
         });
     });
+
+    describe('#injectClientUtils()', function() {
+        it('should properly inject the client utils in the remote webpage.', function() {
+            var browserInstance = null;
+
+            return browser.create()
+                .then(function(instance) {
+                    browserInstance = instance;
+                    return browserInstance.open('http://localhost:3000/test-clientutils/');
+                })
+                .then(function() {
+                    return browserInstance.click('#clickme');
+                })
+                .then(function() {
+                    return browserInstance.fetchText('#result');
+                })
+                .should.eventually.equal('OK');
+        });
+    });
+
+    describe('#waitWhileVisible()', function() {
+        it('should succeed after aprox 2 seconds.', function(done) {
+            var browserInstance = null;
+
+            return browser.create()
+                .then(function(instance) {
+                    browserInstance = instance;
+                    return browserInstance.open('http://localhost:3000/test-waitwhilevisible/');
+                })
+                .then(function() {
+                    return browserInstance.waitWhileVisible('#inner')
+                })
+                .then(function() {
+                    done();
+                })
+                .catch(function(err) {
+                    done(err);
+                });
+        })
+    })
 });

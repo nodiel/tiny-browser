@@ -21,4 +21,8 @@ router.get('/test-clientutils', function(request, response) {
     response.render('test-clientutils');
 });
 
+router.get('/test-waitwhilevisible', function(request, response) {
+    response.render('test-waitwhilevisible');
+})
+
 module.exports = router;
