@@ -274,6 +274,19 @@ class TinyBrowser {
         return result;
     }
 
+    async waitWhileVisible(selector) {
+        debug(`Waiting while ${selector} is visible.`);
+        await this._untilReady();
+        var self = this;
+
+
+        return this.waitFor(function() {
+            return self._page.evaluate(function(domSelector) {
+                return !__utils__.visible(domSelector);
+            }, selector);
+        });
+    }
+
     async waitForSelector(selector) {
         const self = this;
 
