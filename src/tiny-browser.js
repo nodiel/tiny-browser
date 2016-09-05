@@ -16,7 +16,7 @@ class TinyBrowser {
         let browserInstance = new TinyBrowser();
 
         browserInstance._loading = false;
-        browserInstance._untilReadyTimeout = 10 * 1000;
+        browserInstance._untilReadyTimeout = options.readyTimeout || 10 * 1000;
 
         await browserInstance._init();
         return browserInstance;
