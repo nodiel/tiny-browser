@@ -289,6 +289,7 @@ class TinyBrowser {
 
     async waitForSelector(selector) {
         const self = this;
+        debug(`entering waitForSelector`);
 
         let checkerFunction = function(domSelector) {
             return !!document.querySelector(domSelector);
@@ -310,8 +311,11 @@ class TinyBrowser {
     async wait(timeout) {
         timeout = timeout || 1000;
 
+        debug(`called wait with a ${timeout}ms timeout.`);
+
         return new Promise((resolve, reject) => {
             setTimeout(function() {
+                debug(`wait finished.`);
                 resolve();
             }, timeout);
         });
