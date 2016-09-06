@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "build-lib": "mkdir dist && cp src/clientutils.js dist/clientutils.js && babel -d dist src -s --ignore clientutils.js",
+    "build-lib": "babel -d dist src -s --ignore clientutils.js && cp src/clientutils.js dist/clientutils.js",
     "postinstall": "postinstall-build dist 'npm run build-lib'"
   },
   "repository": {
@@ -29,6 +29,7 @@
   "devDependencies": {
     "babel-cli": "^6.10.1",
     "babel-eslint": "^6.1.2",
+    "babel-plugin-transform-async-to-generator": "^6.8.0",
     "babel-plugin-transform-runtime": "^6.9.0",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-stage-2": "^6.11.0",
