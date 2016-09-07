@@ -17,6 +17,7 @@ class TinyBrowser {
 
         browserInstance._loading = false;
         browserInstance._untilReadyTimeout = options.readyTimeout || 10 * 1000;
+        browserInstance._waitForTimeout = options.waitFotTimeout || 10 * 1000;
 
         await browserInstance._init();
         return browserInstance;
@@ -223,7 +224,7 @@ class TinyBrowser {
     async waitFor(asyncPredicate, timeout) {
         const self = this;
 
-        let maxTimeout = timeout || 5 * 1000;
+        let maxTimeout = timeout || this._waitForTimeout;
 
         let conditionPolling = new Promise(function(resolve, reject) {
             const started = Date.now();
