@@ -17,7 +17,7 @@ class TinyBrowser {
 
         browserInstance._loading = false;
         browserInstance._untilReadyTimeout = options.readyTimeout || 10 * 1000;
-        browserInstance._waitForTimeout = options.waitFotTimeout || 10 * 1000;
+        browserInstance._waitForTimeout = options.waitForTimeout || 10 * 1000;
 
         await browserInstance._init();
         return browserInstance;
