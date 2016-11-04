@@ -13,6 +13,8 @@ class TinyBrowser {
      * @return     {TinyBrowser}  a new instance of TinyBrowser
      */
     static async create(options) {
+        options = options || {};
+
         let browserInstance = new TinyBrowser();
 
         browserInstance._loading = false;
@@ -172,46 +174,26 @@ class TinyBrowser {
     async click(selector) {
         debug('Clicking selector: %s', selector);
 
-        let clickFunction = function(domSelector) {
-            var clickEvent = document.createEvent("MouseEvent");
-
-            clickEvent.initMouseEvent(
-                "click",
-                true, true,
-                window, null,
-                0, 0, 0, 0,
-                false, false, false, false,
-                0, null
-            );
-
-            var element = document.querySelector(domSelector);
-            element.dispatchEvent(clickEvent);
-        };
-
         await this._untilReady();
-        await this._page.evaluate(clickFunction, selector);
+
+        let result = await this._page.evaluate(function(domSelector) {
+            return __utils__.click(domSelector);
+        }, selector);
 
         debug('Done clicking selector.');
+
+        return result;
     }
 
     async fillForm(data) {
         debug('Filling fields with values: %s', JSON.stringify(data));
-
-        let fillerFunction = function(domData) {
-            for (var selector in domData) {
-                var element = document.querySelector(selector);
-
-                if (!element) {
-                    console.log('Not found sleector. fillForm');
-                    continue;
-                }
-
-                element.value = domData[selector];
-            }
-        };
-
         await this._untilReady();
-        await this._page.evaluate(fillerFunction, data);
+
+        let result = await this._page.evaluate(function(domData){
+            return __utils__.fill(domData);
+        }, data);
+
+        return result;
     }
 
     async capture(outPath) {
