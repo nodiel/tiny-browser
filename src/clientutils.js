@@ -124,7 +124,7 @@
                 logValue = new Array(('' + value).length + 1).join('*');
             }
 
-            this.log('Set "' + field.getAttribute('name') + '" field value to' + logValue);
+            this.log('Set "' + field.getAttribute('name') + '" field value to ' + logValue);
 
             try {
                 field.focus();
@@ -172,6 +172,9 @@
                     }
 
                     break;
+
+                default:
+                    field.value = value;
             }
 
             ['change', 'input'].forEach(function(name) {
