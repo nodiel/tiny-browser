@@ -23,6 +23,10 @@ router.get('/test-clientutils', function(request, response) {
 
 router.get('/test-waitwhilevisible', function(request, response) {
     response.render('test-waitwhilevisible');
-})
+});
+
+router.get('/test-fill', function(request, response) {
+    response.render('test-fill');
+});
 
 module.exports = router;

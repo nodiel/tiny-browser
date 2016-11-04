@@ -175,6 +175,28 @@ describe('TinyBrowser', function() {
                 .catch(function(err) {
                     done(err);
                 });
-        })
-    })
+        });
+    });
+
+    describe('#fillForm()', function() {
+        it('should fill the input fields correctly and fire all the events [change, input] attached on them.', function() {
+            var browserInstance = null;
+
+            return browser.create()
+                .then(function(instance) {
+                    browserInstance = instance;
+                    return browserInstance.open('http://localhost:3000/test-fill/');
+                })
+                .then(function() {
+                    return browserInstance.fillForm({
+                        '#select-here': '2'
+                    });
+                })
+                .then(function() {
+                    return browserInstance.fetchText('#notify');
+                })
+                .should.eventually.equal('changed');
+            });
+
+        });
 });

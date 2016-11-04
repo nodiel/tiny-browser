@@ -1,0 +1,15 @@
+extends ./layout.pug
+
+block content
+    select#select-here
+        option(value='1') Some option
+        option(value='2') Some other option
+
+    label#notify
+
+    script(type='text/javascript').
+        (function() {
+            document.querySelector('#select-here').addEventListener('change', function(e) {
+                document.querySelector('#notify').innerText = 'changed';
+            });
+        })();
