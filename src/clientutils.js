@@ -64,7 +64,7 @@
                 return Array.prototype.slice.call(scope.querySelectorAll(selector));
             }
             catch (e) {
-                console.log('findAll(): invalid sleector provided "' + sleector + '":' + e);
+                console.log('findAll(): invalid selector provided "' + selector + '":' + e);
             }
         };
 
@@ -75,7 +75,7 @@
                 return scope.querySelector(selector);
             }
             catch (e) {
-                this.log('findOne(): invalid selector"' + sleector + '": ' + e)
+                this.log('findOne(): invalid selector"' + selector + '": ' + e)
                 console.log();
             }
         };
