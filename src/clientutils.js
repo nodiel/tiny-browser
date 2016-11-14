@@ -43,14 +43,16 @@
                 return false;
             }
             var hidden = style.visibility === 'hidden' || style.display === 'none';
+
             if (hidden) {
                 return false;
             }
-            var visibles = ["inline", "inline-block", "flex", "inline-flex"];
-            if (visibles.indexOf(style.display) !== -1) {
-                return true;
+
+            if (elem.clientHeight === 0 && elem.clientWidth === 0) {
+                return false;
             }
-            return elem.clientHeight > 0 && elem.clientWidth > 0;
+
+            return true;
         };
 
         this.visible = function visible(selector) {
