@@ -113,8 +113,7 @@
 
         this.setField = function setField(field, value) {
 
-            var logValue;
-            value = logValue = value || "";
+            var logValue = value;
 
             if (!(field instanceof HTMLElement)) {
                 var error = new Error('setField: Invalid field; only HTMLElement is supported');
