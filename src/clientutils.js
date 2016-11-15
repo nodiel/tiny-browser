@@ -165,7 +165,9 @@
                     }
 
                     // if the value can't be found, try search options text
-                    if (field.value !== value) {
+                    if (field.value.toString() !== value.toString()) {
+                        this.log("Value of select couldn't be found, trying searching by options text.");
+
                         [].some.call(field.options, function(option) {
 
                             option.selected = (value === option.text);
