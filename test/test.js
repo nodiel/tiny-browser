@@ -179,7 +179,7 @@ describe('TinyBrowser', function() {
     });
 
     describe('#fillForm()', function() {
-        it('should fill the input fields correctly and fire all the events [change, input] attached on them.', function() {
+        it('should fill the input fields correctly and fire the events change attached on them.', function() {
             var browserInstance = null;
 
             return browser.create()
@@ -199,4 +199,36 @@ describe('TinyBrowser', function() {
             });
 
         });
+
+    it('should fill the input of type text and email and fire the keyup events attached to them', function() {
+        var browserInstance = null;
+
+        return browser.create()
+            .then(function(instance) {
+                browserInstance = instance;
+                return browserInstance.open('http://localhost:3000/test-input/');
+            })
+            .then(function() {
+                return browserInstance.fillForm({
+                    '#text-input': 'here',
+                    '#email-input': 'here'
+                });
+            })
+            .then(function() {
+                var notifyTexts = [];
+
+                return browserInstance.fetchText('#notify-text')
+                    .then(function(inputText) {
+                        notifyTexts.push(inputText);
+                    })
+                    .then(function() {
+                        return browserInstance.fetchText('#notify-email');
+                    })
+                    .then(function(inputEmail){
+                        notifyTexts.push(inputEmail);
+                        return notifyTexts;
+                    });
+            })
+            .should.eventually.deep.equal(['changed', 'changed']);
+    });
 });

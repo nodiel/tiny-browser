@@ -29,4 +29,8 @@ router.get('/test-fill', function(request, response) {
     response.render('test-fill');
 });
 
+router.get('/test-input', function(request, response) {
+    response.render('test-textinputs');
+});
+
 module.exports = router;

@@ -1,0 +1,20 @@
+extends ./layout.pug
+
+block content
+    input#text-input(type='text', name='text')
+    input#email-input(type='email', name='email')
+
+    label#notify-text
+    label#notify-email
+
+    script(type='text/javascript').
+        (function() {
+            ['#text-input', '#email-input'].forEach(function(selector) {
+                var element = document.querySelector(selector);
+
+                element.addEventListener('keyup', function(e) {
+                    var idLabel = '#notify-' + element.name;
+                    document.querySelector(idLabel).innerText = 'changed';
+                });
+            });
+        })();

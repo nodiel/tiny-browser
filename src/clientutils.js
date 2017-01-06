@@ -176,14 +176,20 @@
 
                     break;
 
+                case 'email':
+                case 'text':
+                    this.triggerEvent(field, 'keydown');
+                    field.value = value;
+                    this.triggerEvent(field, 'keyup');
+
                 default:
                     field.value = value;
             }
 
+            var self = this;
+
             ['change', 'input'].forEach(function(name) {
-                var event = document.createEvent('HTMLEvents');
-                event.initEvent(name, true, true);
-                field.dispatchEvent(event);
+                self.triggerEvent(field, name);
             });
 
             try {
@@ -192,6 +198,14 @@
             catch (err) {
                 this.log('Unable to blur() input field ' + field.getAttribute('name') + ': ' + err, 'warning');
             }
+        };
+
+        this.triggerEvent = function(element, eventType) {
+            this.log('Triggering event: ' + eventType + ' on element: ' + element);
+
+                var event = document.createEvent('HTMLEvents');
+                event.initEvent(eventType, true, true);
+                element.dispatchEvent(event);
         };
 
         this.click = function click(selector) {
